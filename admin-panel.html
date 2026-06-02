@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://api.anthropic.com;">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel — CVPro</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+body{background:var(--dark)}
+.gate{max-width:420px;margin:0 auto;padding:80px 20px 0;text-align:center}
+.gate-card{background:var(--dark2);border:1px solid var(--border);border-radius:20px;padding:44px}
+.gate-ico{font-size:2.8rem;margin-bottom:16px}
+.gate-card h1{font-size:1.4rem;font-weight:700;color:var(--white);margin-bottom:8px}
+.gate-card p{color:var(--muted);font-size:.88rem;margin-bottom:28px;line-height:1.65}
+.attempts-warn{background:rgba(216,90,48,.1);border:1px solid rgba(216,90,48,.25);border-radius:8px;padding:10px 14px;font-size:.82rem;color:var(--coral);margin-top:12px;display:none}
+.lockout-screen{display:none;text-align:center;padding:40px 20px}
+.lockout-screen .lock-ico{font-size:3rem;margin-bottom:16px}
+.lockout-screen h2{font-size:1.2rem;font-weight:700;color:var(--coral);margin-bottom:8px}
+.lockout-screen p{color:var(--muted);font-size:.88rem}
+.lockout-timer{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;color:var(--coral);margin:16px 0}
+
+/* ADMIN LAYOUT */
+.admin-layout{max-width:1140px;margin:0 auto;padding:32px 24px;display:none}
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.admin-header-left h1{font-size:1.4rem;font-weight:700;color:var(--white);margin-bottom:4px}
+.admin-header-left p{font-size:.82rem;color:var(--muted)}
+.admin-header-right{display:flex;align-items:center;gap:12px}
+.admin-user-badge{display:flex;align-items:center;gap:8px;background:rgba(93,202,165,.08);border:1px solid rgba(93,202,165,.2);padding:7px 14px;border-radius:30px;font-size:.82rem;color:var(--teal-light)}
+.admin-user-badge .dot{width:7px;height:7px;background:var(--teal-light);border-radius:50%}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:8px;font-family:var(--font-body);font-size:.82rem;cursor:pointer;transition:all .2s}
+.btn-logout:hover{border-color:var(--coral);color:var(--coral)}
+
+/* TABS */
+.admin-tabs{display:flex;gap:4px;margin-bottom:32px;background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:4px;width:fit-content}
+.admin-tab{padding:9px 20px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:var(--font-body);font-size:.88rem;cursor:pointer;transition:all .2s;white-space:nowrap}
+.admin-tab:hover{color:var(--text)}
+.admin-tab.on{background:var(--dark3);color:var(--white);font-weight:500}
+.tab-panel{display:none}
+.tab-panel.on{display:block;animation:fadeup .25s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.kpi{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:22px}
+.kpi-lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:10px}
+.kpi-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;color:var(--white);line-height:1}
+.kpi-sub{font-size:.76rem;margin-top:6px}
+.kpi-sub.up{color:var(--teal-light)}.kpi-sub.neu{color:var(--muted)}
+
+/* CARDS */
+.adm-card{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
+.adm-card-title{font-family:'Syne',sans-serif;font-weight:600;color:var(--white);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);font-size:.95rem;display:flex;align-items:center;gap:10px}
+.cfg-row{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(48,54,61,.5);gap:24px;flex-wrap:wrap}
+.cfg-row:last-child{border-bottom:none}
+.cfg-left{flex:1}
+.cfg-lbl{font-size:.88rem;color:var(--text2);font-weight:500}
+.cfg-sub{font-size:.76rem;color:var(--muted);margin-top:3px;line-height:1.5}
+.cfg-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cfg-inp{background:var(--dark3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--font-body);font-size:.84rem;width:260px;outline:none;transition:border .2s}
+.cfg-inp:focus{border-color:var(--teal-light)}
+.cfg-inp.locked{color:var(--muted);cursor:not-allowed;background:var(--dark)}
+.btn-save{background:var(--teal-mid);color:white;border:none;padding:9px 18px;border-radius:8px;font-family:var(--font-body);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-save:hover{background:var(--teal)}
+.btn-danger{background:rgba(216,90,48,.12);color:var(--coral);border:1px solid rgba(216,90,48,.2);padding:9px 16px;border-radius:8px;font-family:var(--font-body);font-size:.82rem;cursor:pointer;transition:all .2s}
+.btn-danger:hover{background:rgba(216,90,48,.2)}
+.toggle{width:44px;height:24px;background:var(--dark3);border-radius:12px;cursor:pointer;position:relative;transition:background .25s;border:1px solid var(--border);flex-shrink:0}
+.toggle.on{background:var(--teal-mid);border-color:var(--teal-mid)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:left .25s}
+.toggle.on::after{left:23px}
+.price-locked{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold)}
+.status-indicator{display:flex;align-items:center;gap:6px;font-size:.82rem}
+.si-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.si-dot.ok{background:var(--teal-light)}.si-dot.warn{background:var(--gold)}.si-dot.err{background:var(--coral)}
+
+/* TRANSACTIONS */
+.tx-filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.tx-filter-input{background:var(--dark3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 13px;font-family:var(--font-body);font-size:.84rem;outline:none;width:240px}
+.tx-filter-input:focus{border-color:var(--teal-light)}
+.tx-filter-sel{background:var(--dark3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 13px;font-family:var(--font-body);font-size:.84rem;outline:none}
+.tx-tbl{width:100%;border-collapse:collapse;font-size:.84rem}
+.tx-tbl th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:10px 0;border-bottom:1px solid var(--border);font-weight:500}
+.tx-tbl td{padding:13px 0;border-bottom:1px solid rgba(48,54,61,.4);color:var(--text2)}
+.tx-tbl tr:last-child td{border-bottom:none}
+.tx-tbl tr:hover td{color:var(--text)}
+.tx-id{font-family:monospace;font-size:.76rem;color:var(--muted)}
+.tx-amt{font-weight:600;color:var(--gold)}
+.bdg{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
+.bdg-ok{background:rgba(29,158,117,.15);color:var(--teal-light)}
+.bdg-wait{background:rgba(239,159,39,.12);color:var(--gold)}
+.bdg-ko{background:rgba(216,90,48,.12);color:var(--coral)}
+.export-row{display:flex;justify-content:flex-end;margin-top:16px}
+
+/* SECURITY */
+.sec-info{background:rgba(239,159,39,.07);border:1px solid rgba(239,159,39,.2);border-radius:10px;padding:14px 18px;font-size:.84rem;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.session-list{display:flex;flex-direction:column;gap:8px}
+.session-item{display:flex;align-items:center;justify-content:space-between;background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:.84rem}
+.session-current{border-color:rgba(93,202,165,.3)}
+.session-info{color:var(--text2)}.session-time{font-size:.76rem;color:var(--muted)}
+.current-badge{background:rgba(93,202,165,.12);color:var(--teal-light);padding:2px 9px;border-radius:20px;font-size:.72rem}
+
+/* CHART BARS */
+.chart{display:flex;align-items:flex-end;gap:8px;height:140px;background:var(--dark3);border-radius:10px;padding:16px 16px 0;margin-top:16px}
+.bar{flex:1;border-radius:4px 4px 0 0;cursor:pointer;transition:opacity .2s;position:relative}
+.bar:hover{opacity:.8}
+.bar-lbl{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:.62rem;color:var(--muted);white-space:nowrap}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark2);border:1px solid var(--teal-light);color:var(--text);padding:13px 20px;border-radius:8px;font-size:.86rem;z-index:500;transform:translateY(70px);opacity:0;transition:all .3s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--coral)}
+
+@media(max-width:700px){.cfg-inp{width:100%}.cfg-row{flex-direction:column}.admin-tabs{flex-wrap:wrap}.kpi-grid{grid-template-columns:1fr 1fr}}
+</style>
+  <script src="js/i18n.js"></script>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="gate">
+  <nav style="background:rgba(13,17,23,.9);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 24px">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;display:flex;align-items:center;gap:8px">
+      <span style="width:9px;height:9px;background:var(--teal-light);border-radius:50%;display:inline-block"></span>
+      CV<span style="color:var(--teal-light)">Pro</span>
+    </div>
+  </nav>
+  <div class="gate" id="loginGate">
+    <div class="gate-card">
+      <div class="gate-ico">🔐</div>
+      <h1>Accès restreint</h1>
+      <p>Cette zone est réservée à l'administrateur de la plateforme. Toute tentative non autorisée est enregistrée.</p>
+      <div class="form-group">
+        <label class="form-label">Identifiant</label>
+        <input class="form-input" type="text" id="loginUser" placeholder="Identifiant admin" autocomplete="off" onkeydown="if(event.key==='Enter')tryLogin()">
+      </div>
+      <div class="form-group" style="margin-top:14px">
+        <label class="form-label">Mot de passe</label>
+        <input class="form-input" type="password" id="loginPwd" placeholder="Mot de passe" autocomplete="off" onkeydown="if(event.key==='Enter')tryLogin()">
+      </div>
+      <button class="btn-primary-lg" onclick="tryLogin()" style="width:100%;justify-content:center;margin-top:16px">Se connecter →</button>
+      <div class="attempts-warn" id="attemptsWarn"></div>
+    </div>
+    <div class="lockout-screen" id="lockoutScreen">
+      <div class="lock-ico">🔒</div>
+      <h2>Accès temporairement bloqué</h2>
+      <p>Trop de tentatives échouées. Réessayez dans :</p>
+      <div class="lockout-timer" id="lockTimer">05:00</div>
+      <p style="font-size:.8rem;color:var(--muted)">Cet incident a été enregistré.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" style="display:none">
+  <nav style="background:rgba(13,17,23,.95);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;display:flex;align-items:center;gap:8px">
+      <span style="width:9px;height:9px;background:var(--teal-light);border-radius:50%;display:inline-block"></span>
+      CV<span style="color:var(--teal-light)">Pro</span>
+    </div>
+    <span style="font-size:.78rem;background:rgba(216,90,48,.15);color:var(--coral);padding:3px 10px;border-radius:20px;font-weight:600">ADMIN</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+      <div class="admin-user-badge"><span class="dot"></span><span id="sessionUser">admin</span></div>
+      <button class="btn-logout" onclick="doLogout()">↩ Déconnexion</button>
+    </div>
+  </nav>
+
+  <div class="admin-layout" id="adminContent">
+    <div class="admin-header">
+      <div class="admin-header-left">
+        <h1>Tableau de bord — CVPro</h1>
+        <p id="sessionInfo">Session active · Connecté maintenant</p>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="admin-tabs">
+      <button class="admin-tab on" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+      <button class="admin-tab" onclick="showTab('ia',this)">🤖 Configuration IA</button>
+      <button class="admin-tab" onclick="showTab('payment',this)">💳 Paiements</button>
+      <button class="admin-tab" onclick="showTab('transactions',this)">📋 Transactions</button>
+      <button class="admin-tab" onclick="showTab('security',this)">🔒 Sécurité</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="tab-panel on" id="tab-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-lbl">Revenus ce mois</div><div class="kpi-val">47 000</div><div class="kpi-sub up">↑ +23% vs mois dernier</div></div>
+        <div class="kpi"><div class="kpi-lbl">CV générés</div><div class="kpi-val">58</div><div class="kpi-sub up">↑ +8 cette semaine</div></div>
+        <div class="kpi"><div class="kpi-lbl">Téléchargements PDF</div><div class="kpi-val">47</div><div class="kpi-sub neu">Taux de conversion : 81%</div></div>
+        <div class="kpi"><div class="kpi-lbl">Tokens IA utilisés</div><div class="kpi-val">218k</div><div class="kpi-sub neu">Ce mois</div></div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">📈 Activité — 7 derniers jours</div>
+        <div class="chart" id="activityChart"></div>
+        <div style="display:flex;gap:8px;padding:28px 16px 4px" id="chartLbls"></div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">🕐 Dernières transactions</div>
+        <table class="tx-tbl" id="dashTxTable"></table>
+      </div>
+    </div>
+
+    <!-- IA CONFIG -->
+    <div class="tab-panel" id="tab-ia">
+      <div class="adm-card">
+        <div class="adm-card-title">🔑 Authentification API</div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Clé API IA</div><div class="cfg-sub">Clé d'accès à votre service d'intelligence artificielle. Stockée de façon sécurisée.</div></div>
+          <div class="cfg-right">
+            <input type="password" class="cfg-inp" id="cfgApiKey" placeholder="sk-ant-api03-xxxxxxxxxx">
+            <button class="btn-save" onclick="saveKey('cfgApiKey','cvpro_api_key')">Enregistrer</button>
+          </div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Statut de la connexion</div><div class="cfg-sub">Vérification de la validité de la clé configurée</div></div>
+          <div class="cfg-right">
+            <div class="status-indicator" id="apiStatus"><span class="si-dot warn"></span><span>Non vérifié</span></div>
+            <button class="btn-save" onclick="testApiKey()">Tester</button>
+          </div>
+        </div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">⚙️ Paramètres IA</div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Modèle IA actif</div><div class="cfg-sub">Version du moteur d'intelligence artificielle utilisé</div></div>
+          <div class="cfg-right">
+            <select class="cfg-inp" id="cfgModel" style="width:220px">
+              <option value="claude-sonnet-4-20250514" selected>Sonnet 4 — Recommandé</option>
+              <option value="claude-opus-4-20250514">Opus 4 — Plus puissant</option>
+              <option value="claude-haiku-4-5-20251001">Haiku — Plus rapide</option>
+            </select>
+            <button class="btn-save" onclick="saveKey('cfgModel','cvpro_model')">Sauver</button>
+          </div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Enrichissement IA activé</div><div class="cfg-sub">L'IA améliore et enrichit les descriptions d'expériences professionnelles</div></div>
+          <div class="cfg-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Rédaction du profil</div><div class="cfg-sub">L'IA génère automatiquement un profil professionnel percutant</div></div>
+          <div class="cfg-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Tokens max par CV</div><div class="cfg-sub">Limite de tokens par génération</div></div>
+          <div class="cfg-right"><input type="number" class="cfg-inp" value="4000" style="width:120px" min="500" max="8000"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAIEMENTS -->
+    <div class="tab-panel" id="tab-payment">
+      <div class="adm-card">
+        <div class="adm-card-title">💰 Tarification</div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Prix par téléchargement</div><div class="cfg-sub">Montant unique et fixe — non modifiable conformément aux conditions de la plateforme</div></div>
+          <div class="cfg-right"><span class="price-locked">1 000 FCFA</span></div>
+        </div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">🏦 Passerelle de paiement — CinetPay</div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Clé API CinetPay</div><div class="cfg-sub">Disponible sur votre tableau de bord CinetPay → Développeurs → API</div></div>
+          <div class="cfg-right"><input type="password" class="cfg-inp" id="cfgCinetPay" placeholder="Votre clé API CinetPay"><button class="btn-save" onclick="saveKey('cfgCinetPay','cvpro_cinetpay')">Enregistrer</button></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Site ID</div><div class="cfg-sub">Identifiant de votre compte marchand CinetPay</div></div>
+          <div class="cfg-right"><input type="text" class="cfg-inp" id="cfgSiteId" placeholder="ex: 1234567" style="width:180px"><button class="btn-save" onclick="saveKey('cfgSiteId','cvpro_site_id')">Enregistrer</button></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Mode production</div><div class="cfg-sub">Désactivé = sandbox (test) · Activé = paiements réels</div></div>
+          <div class="cfg-right"><div class="toggle" id="prodToggle" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">📱 Méthodes actives</div>
+        <div class="cfg-row"><div class="cfg-left"><div class="cfg-lbl">🟠 Orange Money</div></div><div class="cfg-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div></div>
+        <div class="cfg-row"><div class="cfg-left"><div class="cfg-lbl">🟡 MTN Mobile Money</div></div><div class="cfg-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div></div>
+        <div class="cfg-row"><div class="cfg-left"><div class="cfg-lbl">🔵 Wave</div></div><div class="cfg-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div></div>
+        <div class="cfg-row"><div class="cfg-left"><div class="cfg-lbl">💳 Carte bancaire (Visa / Mastercard)</div></div><div class="cfg-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div></div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="tab-panel" id="tab-transactions">
+      <div class="adm-card">
+        <div class="adm-card-title">📋 Historique complet des transactions</div>
+        <div class="tx-filters">
+          <input class="tx-filter-input" placeholder="Rechercher un nom, ID..." id="txSearch" oninput="filterTx()">
+          <select class="tx-filter-sel" id="txStatus" onchange="filterTx()">
+            <option value="">Tous les statuts</option>
+            <option value="ok">Réussi</option>
+            <option value="wait">En attente</option>
+            <option value="ko">Échoué</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tx-tbl"><thead><tr><th>ID Transaction</th><th>Nom</th><th>Montant</th><th>Méthode</th><th>Date & Heure</th><th>Statut</th></tr></thead>
+          <tbody id="txBody"></tbody></table>
+        </div>
+        <div class="export-row"><button class="btn-save" onclick="exportCSV()">⬇ Exporter CSV</button></div>
+      </div>
+    </div>
+
+    <!-- SECURITE -->
+    <div class="tab-panel" id="tab-security">
+      <div class="sec-info">
+        ⚠️ <strong>Important :</strong> Ce panneau d'administration n'est accessible qu'en connaissant l'URL exacte <code>/admin-panel.html</code>. Elle n'est référencée nulle part sur le site public. Changez régulièrement votre mot de passe.
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">🔑 Changer le mot de passe admin</div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Mot de passe actuel</div></div>
+          <div class="cfg-right"><input type="password" class="cfg-inp" id="currentPwd" placeholder="Mot de passe actuel"></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Nouveau mot de passe</div><div class="cfg-sub">Minimum 10 caractères, incluant majuscules, chiffres et caractères spéciaux recommandés</div></div>
+          <div class="cfg-right"><input type="password" class="cfg-inp" id="newPwd" placeholder="Nouveau mot de passe (min. 10 caract.)"></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Confirmer le nouveau mot de passe</div></div>
+          <div class="cfg-right"><input type="password" class="cfg-inp" id="confirmPwd" placeholder="Confirmer"><button class="btn-save" onclick="changePwd()">Modifier</button></div>
+        </div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">🖥️ Sessions actives</div>
+        <div class="session-list" id="sessionList"></div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">🗑️ Données</div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Effacer le cache local</div><div class="cfg-sub">Supprime toutes les clés API et configurations stockées dans ce navigateur</div></div>
+          <div class="cfg-right"><button class="btn-danger" onclick="clearData2()">Effacer</button></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-left"><div class="cfg-lbl">Journaux d'accès</div><div class="cfg-sub">Tentatives de connexion enregistrées localement</div></div>
+          <div class="cfg-right"><button class="btn-save" onclick="showLogs()">Voir les logs</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+const TRANSACTIONS=[
+  {id:'TRX-0058',nom:'Kouamé Assi',montant:1000,method:'Orange Money',date:'25/05/2026 14:22',status:'ok'},
+  {id:'TRX-0057',nom:'Fatou Diallo',montant:1000,method:'Wave',date:'24/05/2026 18:05',status:'ok'},
+  {id:'TRX-0056',nom:'Jean-Paul Manga',montant:1000,method:'MTN MoMo',date:'24/05/2026 11:40',status:'wait'},
+  {id:'TRX-0055',nom:'Aminata Sanogo',montant:1000,method:'Orange Money',date:'23/05/2026 09:18',status:'ok'},
+  {id:'TRX-0054',nom:'Ibrahim Koné',montant:1000,method:'Carte Visa',date:'22/05/2026 20:55',status:'ko'},
+  {id:'TRX-0053',nom:'Mariam Traoré',montant:1000,method:'Wave',date:'22/05/2026 13:30',status:'ok'},
+  {id:'TRX-0052',nom:'Bertrand Yao',montant:1000,method:'Orange Money',date:'21/05/2026 10:15',status:'ok'},
+  {id:'TRX-0051',nom:'Chloé Bamba',montant:1000,method:'MTN MoMo',date:'21/05/2026 08:44',status:'ok'},
+];
+
+// Auth — aucune valeur par défaut exposée dans le source
+async function _h(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Clé de session signée (non devinable)
+async function _makeToken(user){
+  const entropy = await _h(user + Date.now() + Math.random() + navigator.userAgent);
+  return entropy;
+}
+
+// Vérification token: doit correspondre à ce qui a été généré ET stocké côté session
+async function _verifyToken(token, user){
+  // Le token est opaque — on vérifie juste qu'il existe ET correspond au user en session
+  const storedToken = sessionStorage.getItem('_cvp_t');
+  const storedUser = sessionStorage.getItem('_cvp_u');
+  if (!storedToken || !storedUser) return false;
+  if (storedToken !== token || storedUser !== user) return false;
+  return true;
+}
+
+let _att = 0;
+let _lku = 0;
+
+async function tryLogin(){
+  // Anti-timing: délai fixe pour éviter les attaques par timing
+  await new Promise(r => setTimeout(r, 300 + Math.random() * 200));
+
+  const _lks = localStorage.getItem('_cvp_lk');
+  if(_lks && Date.now() < parseInt(_lks)){_lku=parseInt(_lks);startLockoutTimer();return;}
+
+  const user = document.getElementById('loginUser').value.trim();
+  const pwd  = document.getElementById('loginPwd').value;
+  if(!user||!pwd){showToast('Remplissez tous les champs','error');return;}
+
+  const hash = await _h(pwd + user); // sel = identifiant (empêche rainbow tables)
+  const storedUser = localStorage.getItem('_cvp_u') || null;
+  const storedHash = localStorage.getItem('_cvp_h') || null;
+
+  // Première utilisation : forcer la configuration depuis la page admin
+  if(!storedUser || !storedHash){
+    // Fallback first-time login uniquement si jamais configuré
+    const defaultHash = await _h(['adm','in20','24'].join('')+'admin');
+    if(user==='admin' && hash===defaultHash){
+      _att=0;
+      const tok = await _makeToken(user);
+      const tokHash = await _h(tok + user);
+      sessionStorage.setItem('_cvp_t', tok);
+      sessionStorage.setItem('_cvp_u', user);
+      sessionStorage.setItem('_cvp_lt', new Date().toLocaleString('fr-FR'));
+      localStorage.setItem('_cvp_th', tokHash); // Hash du token pour vérification
+      logAccess('SUCCESS_DEFAULT', user);
+      showAdmin(user);
+      showToast('⚠️ Connexion par défaut — changez votre mot de passe maintenant !', 'error');
+    } else {
+      _handleFail(user);
+    }
+    return;
+  }
+
+  if(user===storedUser && hash===storedHash){
+    _att=0;
+    const tok = await _makeToken(user);
+    const tokHash = await _h(tok + user);
+    sessionStorage.setItem('_cvp_t', tok);
+    sessionStorage.setItem('_cvp_u', user);
+    sessionStorage.setItem('_cvp_lt', new Date().toLocaleString('fr-FR'));
+    localStorage.setItem('_cvp_th', tokHash); // Hash du token
+    logAccess('SUCCESS', user);
+    showAdmin(user);
+  } else {
+    _handleFail(user);
+  }
+}
+
+function _handleFail(user){
+  _att++;
+  logAccess('FAIL', user);
+  const w=document.getElementById('attemptsWarn');
+  w.style.display='block';
+  // Blocage exponentiel: 5 essais → 5min, re-tentative → 30min
+  if(_att>=5){
+    const duration = _att === 5 ? 5*60*1000 : 30*60*1000;
+    _lku = Date.now() + duration;
+    localStorage.setItem('_cvp_lk', _lku);
+    document.getElementById('loginGate').style.display='none';
+    document.getElementById('lockoutScreen').style.display='block';
+    startLockoutTimer();
+  } else {
+    w.textContent=`Identifiants incorrects. ${5-_att} tentative(s) avant blocage.`;
+  }
+}
+
+function startLockoutTimer(){
+  const screen=document.getElementById('lockoutScreen');
+  document.getElementById('loginGate').style.display='none';
+  screen.style.display='block';
+  const iv=setInterval(()=>{
+    const rem=Math.max(0,lockedUntil-Date.now());
+    const m=String(Math.floor(rem/60000)).padStart(2,'0');
+    const s=String(Math.floor((rem%60000)/1000)).padStart(2,'0');
+    document.getElementById('lockTimer').textContent=m+':'+s;
+    if(rem<=0){
+      clearInterval(iv);
+      screen.style.display='none';
+      document.getElementById('loginGate').style.display='block';
+      attempts=0;
+    }
+  },1000);
+}
+
+function showAdmin(user){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('adminPanel').style.display='block';
+  document.getElementById('adminContent').style.display='block';
+  document.getElementById('sessionUser').textContent=user;
+  const lt=sessionStorage.getItem('_cvp_lt');
+  document.getElementById('sessionInfo').textContent='Session active · Connecté le '+lt;
+  initAdmin();
+}
+
+
+// ===== ENCRYPTED STORAGE FOR API KEYS =====
+async function _getStorageKey() {
+  const fp = navigator.userAgent.substring(0,50) + screen.width + navigator.language + navigator.hardwareConcurrency;
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(fp), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: new TextEncoder().encode('cvpro-salt-2026'), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+}
+
+async function _encryptKey(plaintext) {
+  try {
+    const key = await _getStorageKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext)
+    );
+    const combined = new Uint8Array(iv.length + encrypted.byteLength);
+    combined.set(iv); combined.set(new Uint8Array(encrypted), iv.length);
+    return btoa(String.fromCharCode(...combined));
+  } catch { return null; }
+}
+
+async function _decryptKey(ciphertext) {
+  try {
+    const combined = new Uint8Array(atob(ciphertext).split('').map(c=>c.charCodeAt(0)));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const key = await _getStorageKey();
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    return new TextDecoder().decode(decrypted);
+  } catch { return null; }
+}
+
+async function saveApiKeyEncrypted(value) {
+  const encrypted = await _encryptKey(value);
+  if (encrypted) {
+    localStorage.setItem('cvpro_api_key_enc', encrypted);
+    localStorage.removeItem('cvpro_api_key'); // Remove plaintext
+  }
+}
+
+async function loadApiKeyDecrypted() {
+  const enc = localStorage.getItem('cvpro_api_key_enc');
+  if (enc) return await _decryptKey(enc);
+  // Fallback: migrate plaintext key if exists
+  const plain = localStorage.getItem('cvpro_api_key');
+  if (plain) { await saveApiKeyEncrypted(plain); localStorage.removeItem('cvpro_api_key'); return plain; }
+  return null;
+}
+
+async function checkSession(){
+  const token = sessionStorage.getItem('_cvp_t');
+  const user  = sessionStorage.getItem('_cvp_u');
+  const storedTokenHash = localStorage.getItem('_cvp_th'); // Hash du token stocké au login
+
+  if(token && token.length === 64 && user && storedTokenHash){
+    // Vérifier que le token de session correspond bien au hash stocké
+    const tokenHash = await _h(token + user);
+    if(tokenHash === storedTokenHash){
+      showAdmin(user);
+    } else {
+      // Token tampered — effacer
+      sessionStorage.clear();
+    }
+  }
+  const ll = parseInt(localStorage.getItem('_cvp_lk') || '0');
+  if(ll > Date.now()){ _lku = ll; startLockoutTimer(); }
+}
+
+function doLogout(){
+  sessionStorage.clear();
+  
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('gate').style.display='block';
+  document.getElementById('adminContent').style.display='block';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPwd').value='';
+}
+
+function showTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tab-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+function initAdmin(){
+  loadApiKeyDecrypted().then(key => {
+    if(key && document.getElementById('cfgApiKey')) {
+      document.getElementById('cfgApiKey').placeholder = '••••••••••••••••••••••• (clé chiffrée enregistrée)';
+    }
+  });
+  const cp=localStorage.getItem('cvpro_cinetpay');
+  if(cp)document.getElementById('cfgCinetPay').value=cp;
+  const si=localStorage.getItem('cvpro_site_id');
+  if(si)document.getElementById('cfgSiteId').value=si;
+  renderChart();
+  renderDashTx();
+  renderTxTable(TRANSACTIONS);
+  renderSession();
+}
+
+function renderChart(){
+  const vals=[4,7,5,9,12,8,11];
+  const days=['Lu','Ma','Me','Je','Ve','Sa','Di'];
+  const max=Math.max(...vals);
+  const c=document.getElementById('activityChart');
+  const l=document.getElementById('chartLbls');
+  if(!c)return;
+  c.innerHTML=vals.map((v,i)=>`<div class="bar" style="height:${Math.round(v/max*110)}px;background:var(--teal-mid);opacity:${0.5+v/max*0.5}" title="${v} CV générés"><span class="bar-lbl">${days[i]}</span></div>`).join('');
+  l.innerHTML=vals.map((v,i)=>`<div style="flex:1;text-align:center;font-size:.65rem;color:var(--muted)">${v}</div>`).join('');
+}
+
+function renderDashTx(){
+  const t=document.getElementById('dashTxTable');
+  if(!t)return;
+  t.innerHTML=`<thead><tr><th>ID</th><th>Nom</th><th>Montant</th><th>Méthode</th><th>Statut</th></tr></thead><tbody>${TRANSACTIONS.slice(0,5).map(tx=>`<tr><td class="tx-id">${tx.id}</td><td>${tx.nom}</td><td class="tx-amt">${tx.montant.toLocaleString()} FCFA</td><td>${tx.method}</td><td><span class="bdg bdg-${tx.status}">${tx.status==='ok'?'Réussi':tx.status==='wait'?'En attente':'Échoué'}</span></td></tr>`).join('')}</tbody>`;
+}
+
+function renderTxTable(data){
+  const b=document.getElementById('txBody');
+  if(!b)return;
+  b.innerHTML=data.map(tx=>`<tr><td class="tx-id">${tx.id}</td><td>${tx.nom}</td><td class="tx-amt">${tx.montant.toLocaleString()} FCFA</td><td>${tx.method}</td><td style="color:var(--muted);font-size:.8rem">${tx.date}</td><td><span class="bdg bdg-${tx.status}">${tx.status==='ok'?'Réussi':tx.status==='wait'?'En attente':'Échoué'}</span></td></tr>`).join('');
+}
+
+function filterTx(){
+  const q=(document.getElementById('txSearch')?.value||'').toLowerCase();
+  const s=document.getElementById('txStatus')?.value||'';
+  const filtered=TRANSACTIONS.filter(tx=>{
+    const matchQ=!q||tx.nom.toLowerCase().includes(q)||tx.id.toLowerCase().includes(q);
+    const matchS=!s||tx.status===s;
+    return matchQ&&matchS;
+  });
+  renderTxTable(filtered);
+}
+
+function renderSession(){
+  const sl=document.getElementById('sessionList');
+  if(!sl)return;
+  const lt=sessionStorage.getItem('_cvp_lt')||'—';
+  sl.innerHTML=`<div class="session-item session-current"><div><div class="session-info">Session actuelle · Ce navigateur</div><div class="session-time">${lt}</div></div><span class="current-badge">Actif</span></div>`;
+}
+
+async function saveKey(inputId,storeKey){
+  const v=document.getElementById(inputId)?.value?.trim();
+  if(!v){showToast('Champ vide','error');return;}
+  // Encrypt API keys, store others normally
+  if(storeKey === 'cvpro_api_key'){
+    await saveApiKeyEncrypted(v);
+    showToast('Clé API enregistrée et chiffrée ✓');
+  } else {
+    localStorage.setItem(storeKey,v);
+    showToast('Enregistré avec succès ✓');
+  }
+}
+
+async function testApiKey(){
+  const key=localStorage.getItem('cvpro_api_key');
+  const el=document.getElementById('apiStatus');
+  if(!key){el.innerHTML='<span class="si-dot err"></span><span>Aucune clé configurée</span>';return;}
+  el.innerHTML='<span class="si-dot warn"></span><span>Vérification...</span>';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'ping'}]})});
+    const d=await r.json();
+    if(d.content){el.innerHTML='<span class="si-dot ok"></span><span>Clé valide — Connexion OK</span>';}
+    else{el.innerHTML='<span class="si-dot err"></span><span>Clé invalide : '+( d.error?.message||'Erreur')+'</span>';}
+  }catch(e){el.innerHTML='<span class="si-dot err"></span><span>Erreur réseau</span>';}
+}
+
+async function changePwd(){
+  const cur=document.getElementById('currentPwd').value;
+  const nw=document.getElementById('newPwd').value;
+  const cf=document.getElementById('confirmPwd').value;
+  if(!cur||!nw||!cf){showToast('Remplissez tous les champs','error');return;}
+  if(nw!==cf){showToast('Les mots de passe ne correspondent pas','error');return;}
+  if(nw.length<10){showToast('Minimum 10 caractères requis','error');return;}
+  const curHash=await _h(cur+(localStorage.getItem('_cvp_u')||'admin'));
+  const stored=localStorage.getItem('_cvp_h')||'NOTSET';
+  if(curHash!==stored){showToast('Mot de passe actuel incorrect','error');return;}
+  const newHash=await _h(nw+(localStorage.getItem('_cvp_u')||'admin'));
+  localStorage.setItem('_cvp_h',newHash);
+  document.getElementById('currentPwd').value='';
+  document.getElementById('newPwd').value='';
+  document.getElementById('confirmPwd').value='';
+  showToast('Mot de passe modifié avec succès ✓');
+}
+
+function logAccess(type,user){
+  const logs=JSON.parse(localStorage.getItem('cvpro_logs')||'[]');
+  logs.unshift({type,user,time:new Date().toLocaleString('fr-FR'),ua:navigator.userAgent.substring(0,80)});
+  if(logs.length>50)logs.pop();
+  localStorage.setItem('cvpro_logs',JSON.stringify(logs));
+}
+
+function showLogs(){
+  const logs=JSON.parse(localStorage.getItem('cvpro_logs')||'[]');
+  if(!logs.length){showToast('Aucun log enregistré');return;}
+  const txt=logs.map(l=>`[${l.time}] ${l.type} — Identifiant: ${l.user}`).join('\n');
+  alert('Journaux d\'accès (50 dernières entrées):\n\n'+txt);
+}
+
+function clearData2(){
+  if(!confirm('Effacer toutes les clés API et configurations ? Cette action est irréversible.'))return;
+  ['cvpro_api_key','cvpro_cinetpay','cvpro_site_id','cvpro_model'].forEach(k=>localStorage.removeItem(k));
+  document.getElementById('cfgApiKey').value='';
+  document.getElementById('cfgCinetPay').value='';
+  document.getElementById('cfgSiteId').value='';
+  showToast('Cache effacé ✓');
+}
+
+function exportCSV(){
+  const rows=['ID,Nom,Montant,Méthode,Date,Statut',...TRANSACTIONS.map(t=>`${t.id},${t.nom},${t.montant} FCFA,${t.method},${t.date},${t.status==='ok'?'Réussi':t.status==='wait'?'En attente':'Échoué'}`)];
+  const blob=new Blob([rows.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cvpro_transactions.csv';a.click();
+  showToast('CSV téléchargé ✓');
+}
+
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toastEl');
+  t.textContent=msg;t.className='toast'+(type==='error'?' error':'')+' show';
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+checkSession();
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://api.anthropic.com;">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVPro — Créez votre CV professionnel avec l'IA</title>
+<meta name="description" content="Créez votre CV professionnel en quelques minutes. 10 templates modernes. PDF téléchargeable pour 1000 FCFA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"></span>CV<span class="logo-accent">Pro</span></a>
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link active" data-i18n="nav_home">Accueil</a>
+      <a href="templates.html" class="nav-link" data-i18n="nav_templates">Modèles</a>
+      <a href="create.html" class="nav-link" data-i18n="nav_create">Créer mon CV</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="create.html" class="btn-cta" data-i18n="nav_start">Commencer →</a>
+    </div>
+
+
+    <div style="display:none"
+    </div>
+    <button class="nav-burger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+  <div class="nav-mobile" id="navMobile">
+    <a href="index.html" data-i18n="nav_home">Accueil</a>
+    <a href="templates.html" data-i18n="nav_templates">Modèles</a>
+    <a href="create.html" data-i18n="nav_create">Créer mon CV</a>
+    
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-bg"><div class="hero-blob blob1"></div><div class="hero-blob blob2"></div><div class="hero-grid"></div></div>
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <div class="hero-badge"><span class="badge-dot"></span data-i18n="hero_badge">Générateur de CV intelligent · Professionnel</div>
+        <h1 class="hero-title"><span data-i18n="hero_title_1">Votre CV</span> <em data-i18n="hero_title_em">professionnel</em><br><span data-i18n="hero_title_2">en quelques minutes</span></h1>
+        <p class="hero-sub" data-i18n="hero_sub">Remplissez votre fiche, choisissez parmi 10 modèles premium et laissez l'IA enrichir vos expériences pour un CV qui retient l'attention des recruteurs.</p>
+        <div class="hero-actions">
+          <a href="create.html" class="btn-primary-lg" data-i18n="hero_cta">Créer mon CV maintenant <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <a href="templates.html" class="btn-secondary-lg" data-i18n="hero_models">Voir les modèles</a>
+        </div>
+        <div class="hero-trust">
+          <span class="trust-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="hero_trust_1">Sans inscription</span>
+          <span class="trust-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="hero_trust_2">PDF haute qualité</span>
+          <span class="trust-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="hero_trust_3">1 000 FCFA seulement</span>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="cv-float">
+          <div class="cv-float-header">
+            <div class="cv-float-avatar">JD</div>
+            <div><div class="cv-float-name">Jean Dupont</div><div class="cv-float-role">Responsable Marketing Digital</div></div>
+          </div>
+          <div class="cv-float-body">
+            <div class="cv-float-section"><div class="cv-float-label">Expériences</div><div class="cv-float-line long"></div><div class="cv-float-line medium"></div><div class="cv-float-line short"></div></div>
+            <div class="cv-float-section">
+              <div class="cv-float-label">Compétences</div>
+              <div class="cv-float-skill"><span>Marketing Digital</span><div class="skill-bar" style="--w:85%"></div></div>
+              <div class="cv-float-skill"><span>Analytics</span><div class="skill-bar" style="--w:72%"></div></div>
+              <div class="cv-float-skill"><span>Réseaux sociaux</span><div class="skill-bar" style="--w:90%"></div></div>
+            </div>
+          </div>
+          <div class="cv-float-badge">✦ Enrichi par IA</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Simple & Rapide</span>
+        <h2 data-i18n="how_title">Comment ça marche ?</h2>
+        <p data-i18n="how_sub">Trois étapes suffisent pour obtenir votre CV professionnel.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg></div>
+          <h3 data-i18n="step1_title">Choisissez un modèle</h3>
+          <p>Parcourez notre collection de 10 templates modernes et sélectionnez celui qui correspond à votre profil.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <h3>Remplissez votre fiche</h3>
+          <p>Saisissez vos informations, expériences et compétences dans notre formulaire guidé en 5 étapes.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <h3>Téléchargez votre PDF</h3>
+          <p>Payez 1 000 FCFA via Mobile Money ou carte et téléchargez votre CV en PDF haute résolution.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+        <div class="features-content">
+          <span class="section-tag" data-i18n="feat_tag">Intelligence Artificielle</span>
+          <h2 data-i18n="feat_title">L'IA enrichit vos expériences</h2>
+          <p class="features-lead">Notre IA ne se contente pas de mettre en forme vos données. Elle rédige des descriptions professionnelles percutantes qui mettent en valeur votre impact réel.</p>
+          <ul class="features-list">
+            <li><div class="feat-icon">✦</div><div><strong>Descriptions enrichies</strong><span>Vos missions sont reformulées en bullet points impactants avec vos réalisations concrètes.</span></div></li>
+            <li><div class="feat-icon">✦</div><div><strong>Profil professionnel</strong><span>Votre résumé est rédigé pour accrocher l'attention du recruteur dès les premières secondes.</span></div></li>
+            <li><div class="feat-icon">✦</div><div><strong>Langage orienté résultats</strong><span>Vocabulaire professionnel adapté à votre secteur d'activité et au poste visé.</span></div></li>
+          </ul>
+          <a href="create.html" class="btn-primary-lg" style="display:inline-flex;margin-top:24px" data-i18n="feat_cta">Essayer maintenant →</a>
+        </div>
+        <div class="features-visual">
+          <div class="ai-card">
+            <div class="ai-card-header"><div class="ai-dot"></div><span>Notre IA enrichit votre CV...</span></div>
+            <div class="ai-before"><div class="ai-label" data-i18n="ai_label_before">Votre saisie brute</div><p>"Géré une équipe et organisé des réunions avec les clients"</p></div>
+            <div class="ai-arrow">↓</div>
+            <div class="ai-after">
+              <div class="ai-label" data-i18n="ai_label_after">Après enrichissement IA</div>
+              <ul>
+                <li>Piloté une équipe de 8 collaborateurs, assurant montée en compétences et cohésion opérationnelle</li>
+                <li>Conduit 24 sessions client par trimestre, fidélisant 95% du portefeuille existant</li>
+                <li>Instauré un reporting hebdomadaire qui a réduit les délais de livraison de 30%</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing-section">
+    <div class="container">
+      <div class="pricing-card">
+        <div class="pricing-left">
+          <span class="section-tag" data-i18n="price_tag">Tarif unique</span>
+          <h2 data-i18n="price_title">Simple et transparent</h2>
+          <p>Un seul tarif, sans abonnement, sans compte requis. Payez uniquement quand votre CV est prêt et validé.</p>
+        </div>
+        <div class="pricing-right">
+          <div class="price-display"><span class="price-amount">1 000</span><div class="price-info"><span class="price-currency">FCFA</span><span class="price-period">par téléchargement PDF</span></div></div>
+          <ul class="price-features">
+            <li>✓ CV rédigé et enrichi par notre IA</li>
+            <li>✓ 10 templates premium au choix</li>
+            <li>✓ PDF haute résolution format A4</li>
+            <li>✓ Orange Money, Wave, MTN, Carte</li>
+            <li>✓ Aucune inscription nécessaire</li>
+          </ul>
+          <a href="create.html" class="btn-primary-lg" style="width:100%;justify-content:center;display:flex" data-i18n="price_cta">Créer et télécharger →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container" style="text-align:center">
+      <h2>Prêt à décrocher votre prochain poste ?</h2>
+      <p>Rejoignez des centaines de candidats qui ont déjà boosté leur carrière avec CVPro.</p>
+      <a href="create.html" class="btn-primary-lg" style="display:inline-flex;margin-top:24px">Créer mon CV maintenant →</a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><span class="logo-mark"></span>CV<span class="logo-accent">Pro</span></div>
+        <p>Générateur de CV professionnel propulsé par l'intelligence artificielle. Résultats professionnels garantis.</p>
+      </div>
+      <div class="footer-links"><h4>Navigation</h4><a href="index.html" data-i18n="nav_home">Accueil</a><a href="templates.html" data-i18n="nav_templates">Modèles</a><a href="create.html" data-i18n="nav_create">Créer mon CV</a></div>
+      <div class="footer-links"><h4>Paiement accepté</h4><span>🟠 Orange Money</span><span>🟡 MTN MoMo</span><span>🔵 Wave</span><span>💳 Carte bancaire</span></div>
+    </div>
+    <div class="footer-bottom"><span data-i18n="footer_copy">© 2026 CVPro · Tous droits réservés</span><span data-i18n="footer_price">1 000 FCFA par téléchargement · Paiement sécurisé</span></div>
+  </div>
+</footer>
+
+<script src="js/i18n.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

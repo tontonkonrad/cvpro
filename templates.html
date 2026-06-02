@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://api.anthropic.com;">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modèles de CV — CVPro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/global.css">
+<style>
+.page-content { padding: calc(var(--nav-h) + 60px) 0 80px; }
+.templates-header { text-align: center; margin-bottom: 56px; }
+.templates-header h1 { color: var(--white); margin-bottom: 14px; }
+.templates-header p { font-size: 1.05rem; max-width: 520px; margin: 0 auto; }
+
+.filter-bar { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+.filter-btn {
+  padding: 8px 20px; border-radius: 30px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-family: var(--font-body);
+  font-size: .85rem; cursor: pointer; transition: all .2s;
+}
+.filter-btn:hover, .filter-btn.active { border-color: var(--teal-light); color: var(--teal-light); background: rgba(93,202,165,.08); }
+
+.templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+
+.template-card {
+  background: var(--dark2); border: 2px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden; cursor: pointer;
+  transition: all .3s; position: relative;
+}
+.template-card:hover { border-color: rgba(93,202,165,.4); transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0,0,0,.4); }
+.template-card.selected { border-color: var(--teal-light); box-shadow: 0 0 0 4px rgba(93,202,165,.15); }
+.template-badge {
+  position: absolute; top: 14px; right: 14px; z-index: 2;
+  padding: 4px 12px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+}
+.badge-popular { background: var(--gold); color: #1a1a1a; }
+.badge-new { background: var(--teal-mid); color: white; }
+.badge-pro { background: var(--coral); color: white; }
+
+.template-preview {
+  height: 220px; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.tpl-selected-check {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  width: 28px; height: 28px; background: var(--teal-light);
+  border-radius: 50%; display: none; align-items: center; justify-content: center;
+  color: var(--dark); font-size: 14px; font-weight: 700;
+}
+.template-card.selected .tpl-selected-check { display: flex; }
+
+.template-info { padding: 18px 20px; border-top: 1px solid var(--border); }
+.template-name { font-family: var(--font-head); font-size: 1rem; font-weight: 600; color: var(--white); margin-bottom: 6px; }
+.template-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+.template-action { display: flex; gap: 10px; }
+.btn-select {
+  flex: 1; padding: 9px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text2); font-family: var(--font-body); font-size: .85rem;
+  cursor: pointer; transition: all .2s; text-align: center;
+}
+.btn-select:hover { border-color: var(--teal-light); color: var(--teal-light); }
+.template-card.selected .btn-select { border-color: var(--teal-light); color: var(--teal-light); background: rgba(93,202,165,.08); }
+.btn-use {
+  flex: 1; padding: 9px; border-radius: var(--radius-sm);
+  border: none; background: var(--teal-mid); color: white;
+  font-family: var(--font-body); font-size: .85rem; font-weight: 500;
+  cursor: pointer; transition: all .2s; text-align: center; text-decoration: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-use:hover { background: var(--teal); }
+
+.sticky-cta {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: var(--dark2); border-top: 1px solid var(--border);
+  padding: 16px 2rem; display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; transform: translateY(100%); transition: transform .3s;
+}
+.sticky-cta.visible { transform: translateY(0); }
+.sticky-cta-info { font-size: .9rem; color: var(--text2); }
+.sticky-cta-info strong { color: var(--teal-light); }
+
+/* MINI CV PREVIEWS */
+.cv-mini { width: 200px; box-shadow: 0 8px 32px rgba(0,0,0,.4); border-radius: 8px; overflow: hidden; }
+.cv-mini-hdr { padding: 14px 12px; display: flex; align-items: center; gap: 10px; }
+.cv-mini-av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .52rem; font-weight: 700; flex-shrink: 0; }
+.cv-mini-name { font-weight: 700; font-size: .58rem; line-height: 1.2; }
+.cv-mini-role { font-size: .5rem; opacity: .75; }
+.cv-mini-body { padding: 10px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cv-mini-section {}
+.cv-mini-stitle { font-size: .42rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding-bottom: 3px; margin-bottom: 6px; }
+.cv-mini-line { height: 4px; border-radius: 2px; margin-bottom: 4px; opacity: .3; }
+.cv-mini-line.dark { opacity: .6; }
+.cv-mini-sidebar { padding: 10px 12px; }
+.cv-mini-2col { display: grid; grid-template-columns: 70px 1fr; }
+@media (max-width: 640px) { .templates-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 400px) { .templates-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"></span><span class="logo-text">CV<strong>Pro</strong></span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="templates.html" class="active">Modèles</a></li>
+      <li><a href="create.html">Créer un CV</a></li>
+      <li><a href="tarifs.html">Tarifs</a></li>
+    </ul>
+    <div class="nav-cta"><a href="create.html" class="btn-cta" data-i18n="nav_start">Créer mon CV →</a></div>
+
+    <button class="burger" id="burger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="page-content">
+  <div class="container">
+    <div class="templates-header">
+      <p class="section-eyebrow">Nos modèles</p>
+      <h1 data-i18n="tpl_title">Choisissez votre style</h1>
+      <p>10 templates conçus par des professionnels, adaptés à tous les secteurs et tous les profils.</p>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all" data-i18n="tpl_filter_all">Tous</button>
+      <button class="filter-btn" data-filter="coloré" data-i18n="tpl_filter_color">Colorés</button>
+      <button class="filter-btn" data-filter="minimal" data-i18n="tpl_filter_minimal">Minimaux</button>
+      <button class="filter-btn" data-filter="sombre" data-i18n="tpl_filter_dark">Sombres</button>
+      <button class="filter-btn" data-filter="classique">Classiques</button>
+    </div>
+
+    <div class="templates-grid" id="templatesGrid"></div>
+  </div>
+</div>
+
+<div class="sticky-cta" id="stickyCta">
+  <div class="sticky-cta-info">Modèle sélectionné : <strong id="selectedName">Aucun</strong></div>
+  <a href="create.html" class="btn-primary" id="useTemplateBtn">Utiliser ce modèle →</a>
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/global.js"></script>
+<script>
+const TEMPLATES = [
+  { id: 'modern', name: 'Modern Pro', desc: 'Design épuré avec sidebar colorée et accent teal', badge: 'popular', tags: ['coloré','classique'], colors: { hdr: '#0F6E56', body: '#fff', sidebar: '#f5f5f5', text: 'white', accent: '#0F6E56' } },
+  { id: 'minimal', name: 'Clean Minimal', desc: 'Élégance pure, typographie bold sur fond blanc', tags: ['minimal'], colors: { hdr: '#1a1a1a', body: '#fff', sidebar: '#fff', text: 'white', accent: '#1a1a1a' } },
+  { id: 'teal', name: 'Teal Creative', desc: 'Accents turquoise vifs, layout aéré et moderne', badge: 'new', tags: ['coloré'], colors: { hdr: '#1D9E75', body: '#fff', sidebar: '#E1F5EE', text: 'white', accent: '#1D9E75' } },
+  { id: 'corporate', name: 'Corporate', desc: 'Sidebar teal foncé, deux colonnes structurées', badge: 'pro', tags: ['coloré','classique'], colors: { hdr: '#fff', body: '#fff', sidebar: '#0F6E56', text: '#1a1a1a', accent: '#0F6E56' } },
+  { id: 'blue', name: 'Bleu Académique', desc: 'Bandes bleues, idéal ingénieur et technique', tags: ['coloré','classique'], colors: { hdr: '#185FA5', body: '#fff', sidebar: '#E6F1FB', text: 'white', accent: '#185FA5' } },
+  { id: 'slate', name: 'Slate Pro', desc: 'Fond ardoise sombre, accents cyan et blanc', tags: ['sombre'], colors: { hdr: '#2d3748', body: '#2d3748', sidebar: '#1a202c', text: 'white', accent: '#5DCAA5' } },
+  { id: 'editorial', name: 'Editorial', desc: 'Bordure noire marquante, style magazine premium', tags: ['minimal','classique'], colors: { hdr: '#fff', body: '#fff', sidebar: '#fff', text: '#1a1a1a', accent: '#1a1a1a' } },
+  { id: 'warm', name: 'Warm Sand', desc: 'Tons sable et terracotta, chaleureux et raffiné', badge: 'new', tags: ['coloré'], colors: { hdr: '#D85A30', body: '#fdf8f3', sidebar: '#fdf8f3', text: 'white', accent: '#D85A30' } },
+  { id: 'bold', name: 'Bold Impact', desc: 'Sidebar noir intense, contraste maximal et puissant', tags: ['sombre','minimal'], colors: { hdr: '#fff', body: '#fff', sidebar: '#1a1a1a', text: '#1a1a1a', accent: '#1a1a1a' } },
+  { id: 'pastel', name: 'Pastel Doux', desc: 'Palette lavande et indigo, doux et professionnel', tags: ['coloré','minimal'], colors: { hdr: '#4F46E5', body: '#fff', sidebar: '#EEF2FF', text: 'white', accent: '#4F46E5' } },
+  { id: 'classique', name: 'Classique Pro', desc: 'Fond blanc, nom centré, titres bleu marine avec double ligne — sobre et élégant', tags: ['minimal','classique'], colors: { hdr: '#ffffff', body: '#fff', sidebar: '#fff', text: '#1A3A6B', accent: '#1A3A6B' }, badge: 'Nouveau' },
+];
+
+let selectedTemplate = localStorage.getItem('cvpro_template') || null;
+
+function buildMiniCV(tpl) {
+  const c = tpl.colors;
+  const isSidebar = ['corporate','bold'].includes(tpl.id);
+  const isEditorial = tpl.id === 'editorial';
+  const isSlate = tpl.id === 'slate';
+  const isClassique = tpl.id === 'classique';
+  const lineColor = isSlate ? 'rgba(255,255,255,.25)' : `rgba(0,0,0,.15)`;
+  const lineColorAlt = isSlate ? 'rgba(255,255,255,.15)' : `rgba(0,0,0,.08)`;
+
+  if (isClassique) {
+    const navy = '#1A3A6B';
+    return `
+    <div class="cv-mini" style="background:#fff;border:1px solid #ddd;padding:10px">
+      <div style="text-align:center;border-bottom:1.5px solid #ccc;padding-bottom:6px;margin-bottom:6px">
+        <div style="font-size:.62rem;font-weight:700;color:#1a1a1a;letter-spacing:.04em">PRÉNOM NOM</div>
+        <div style="font-size:.46rem;color:${navy};font-weight:600;margin-bottom:4px">Titre du poste</div>
+        <div style="font-size:.4rem;color:#888;display:flex;justify-content:center;gap:6px"><span>📞 +225</span><span>✉ email@mail.com</span></div>
+      </div>
+      <div style="border-top:2px solid ${navy};border-bottom:1px solid ${navy};padding:1px 0;margin-bottom:5px">
+        <div style="font-size:.42rem;font-weight:700;color:${navy};text-transform:uppercase;letter-spacing:.08em">À propos de moi</div>
+      </div>
+      ${[90,80,70].map(w=>`<div class="cv-mini-line" style="width:${w}%;background:rgba(0,0,0,.1);margin-bottom:3px"></div>`).join('')}
+      <div style="border-top:2px solid ${navy};border-bottom:1px solid ${navy};padding:1px 0;margin:6px 0 5px">
+        <div style="font-size:.42rem;font-weight:700;color:${navy};text-transform:uppercase;letter-spacing:.08em">Expérience professionnelle</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+        <div class="cv-mini-line" style="width:55%;background:rgba(0,0,0,.2)"></div>
+        <div class="cv-mini-line" style="width:25%;background:rgba(0,0,0,.12)"></div>
+      </div>
+      ${[80,65,75].map(w=>`<div class="cv-mini-line" style="width:${w}%;background:rgba(0,0,0,.08);margin-bottom:2px"></div>`).join('')}
+    </div>`;
+  }
+
+  return `
+    <div class="cv-mini" style="background:${c.body};${isEditorial?'border:2px solid #1a1a1a;':''}${isSlate?'background:#2d3748;':''}">
+      ${isSidebar ? `
+        <div style="display:grid;grid-template-columns:60px 1fr;min-height:180px">
+          <div style="background:${c.sidebar};padding:10px 8px">
+            <div style="width:24px;height:24px;border-radius:50%;background:${isSlate?'#5DCAA5':c.accent};margin:0 auto 8px;opacity:.8"></div>
+            ${[60,80,50,70,55,40].map(w=>`<div class="cv-mini-line" style="width:${w}%;background:${c.text==='white'?'rgba(255,255,255,.4)':'rgba(0,0,0,.25)'};margin-bottom:5px"></div>`).join('')}
+          </div>
+          <div style="padding:10px 10px">
+            <div style="font-size:.6rem;font-weight:700;color:${c.accent};font-family:sans-serif">NOM PRÉNOM</div>
+            <div style="font-size:.46rem;color:rgba(0,0,0,.5);margin-bottom:8px">Titre du poste</div>
+            ${[80,60,90,70].map(w=>`<div class="cv-mini-line" style="width:${w}%;background:${lineColor}"></div>`).join('')}
+          </div>
+        </div>
+      ` : `
+        <div class="cv-mini-hdr" style="background:${c.hdr}">
+          <div class="cv-mini-av" style="background:${c.text==='white'?'rgba(255,255,255,.25)':c.accent+'22'};color:${c.text}">AB</div>
+          <div>
+            <div class="cv-mini-name" style="color:${c.text}">PRÉNOM NOM</div>
+            <div class="cv-mini-role" style="color:${c.text}">Titre du poste</div>
+          </div>
+        </div>
+        <div style="padding:10px 12px;background:${isSlate?'#2d3748':c.body}">
+          <div style="font-size:.42rem;font-weight:700;letter-spacing:.08em;color:${c.accent};text-transform:uppercase;border-bottom:1.5px solid ${c.accent};padding-bottom:2px;margin-bottom:6px">Expériences</div>
+          ${[80,60,90,50,70].map(w=>`<div class="cv-mini-line" style="width:${w}%;background:${isSlate?'rgba(255,255,255,.2)':lineColor}"></div>`).join('')}
+          <div style="font-size:.42rem;font-weight:700;letter-spacing:.08em;color:${c.accent};text-transform:uppercase;border-bottom:1.5px solid ${c.accent};padding-bottom:2px;margin:8px 0 6px">Compétences</div>
+          ${[65,80,55].map(w=>`<div class="cv-mini-line" style="width:${w}%;background:${isSlate?'rgba(255,255,255,.2)':lineColorAlt}"></div>`).join('')}
+        </div>
+      `}
+    </div>`;
+}
+
+function renderTemplates(filter = 'all') {
+  const grid = document.getElementById('templatesGrid');
+  const filtered = filter === 'all' ? TEMPLATES : TEMPLATES.filter(t => t.tags.includes(filter));
+  grid.innerHTML = filtered.map(t => `
+    <div class="template-card ${selectedTemplate === t.id ? 'selected' : ''}" id="tcard_${t.id}" onclick="selectTemplate('${t.id}','${t.name}')">
+      <div class="tpl-selected-check">✓</div>
+      ${t.badge ? `<div class="template-badge badge-${t.badge}">${t.badge==='popular'?'Populaire':t.badge==='new'?'Nouveau':'Pro'}</div>` : ''}
+      <div class="template-preview" style="background:${t.colors.body};display:flex;align-items:center;justify-content:center;padding:20px">
+        ${buildMiniCV(t)}
+      </div>
+      <div class="template-info">
+        <div class="template-name">${t.name}</div>
+        <div class="template-desc">${t.desc}</div>
+        <div class="template-action">
+          <button class="btn-select" onclick="event.stopPropagation();selectTemplate('${t.id}','${t.name}')">${selectedTemplate===t.id?'✓ Sélectionné':'Sélectionner'}</button>
+          <a href="create.html" class="btn-use" onclick="localStorage.setItem('cvpro_template','${t.id}')">Utiliser →</a>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectTemplate(id, name) {
+  selectedTemplate = id;
+  localStorage.setItem('cvpro_template', id);
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('tcard_' + id);
+  if (card) card.classList.add('selected');
+  document.getElementById('selectedName').textContent = name;
+  document.getElementById('stickyCta').classList.add('visible');
+  document.getElementById('useTemplateBtn').href = 'create.html';
+  document.querySelectorAll('.btn-select').forEach(b => b.textContent = 'Sélectionner');
+  const selBtn = card?.querySelector('.btn-select');
+  if (selBtn) selBtn.textContent = '✓ Sélectionné';
+  showToast('Modèle "' + name + '" sélectionné');
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTemplates(btn.dataset.filter);
+  });
+});
+
+renderTemplates();
+if (selectedTemplate) {
+  const tpl = TEMPLATES.find(t => t.id === selectedTemplate);
+  if (tpl) {
+    document.getElementById('selectedName').textContent = tpl.name;
+    document.getElementById('stickyCta').classList.add('visible');
+  }
+}
+</script>
+</body>
+</html>
